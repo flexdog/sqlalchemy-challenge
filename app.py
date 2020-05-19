@@ -1,5 +1,33 @@
+
+import numpy as np
+import pandas as pd
+
+import datetime as dt
+import time
+
+# Python SQL toolkit and Object Relational Mapper
+import sqlalchemy
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, func, inspect, desc, asc
+
+
 # Import Flask
-from flask import Flask
+from flask import Flask, jsonify
+
+
+#################################################
+# Database Setup
+#################################################
+
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
+Base = automap_base()
+Base.prepare(engine, reflect=True)
+Measurement = Base.classes.measurement
+Station = Base.classes.station
+session = Session(engine)
+
+
 
 # Create an app, being sure to pass __name__
 app = Flask(__name__)
@@ -28,27 +56,48 @@ def index():
 @app.route("/api/v1.0/precipitation/")
 def precipitation():
     print("Server received request for 'precipitation' page...")
-    return "Welcome to precipitation page "
+    
+    # Perform a query to retrieve the data and precipitation scores
+    prec_list = []
+    results = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date.like('2017%')).order_by(asc(Measurement.date))
+    for row in results:
+        prec_list.append(row)
+        
+    prec_df = pd.DataFrame(prec_list)
+    prec_df = prec_df.set_index('date')
+    prec_df = prec_df.sort_values(by=['date'])
+    prec_df.replace(np.nan,0, inplace=True)
+    prec_dict = prec_df.to_dict()
+        
+    return jsonify(prec_dict)
 
 @app.route("/api/v1.0/stations/")
 def stations():
     print("Server received request for 'stations' page...")
-    return "Welcome to my 'About' page!"
+    station_list = []
+    results = session.query(Measurement.station).distinct(Measurement.station)
+    for row in results:
+        station_list.append(row)
+    
+    station_df =pd.DataFrame(station_list)
+    station_dict = station_df.to_dict()
+    
+    return jsonify(station_dict)
 
 @app.route("/api/v1.0/tobs/")
 def tobs():
     print("Server received request for 'tempreture observations' page...")
-    return "Welcome to my 'About' page!"
+    return "Welcome to the tempreture observations page!"
 
 @app.route("/api/v1.0/<start>/")
 def start():
     print("Server received request for 'range start' page...")
-    return "Welcome to my 'About' page!"
+    return "Welcome to the start range page!"
 
 @app.route("/api/v1.0/<stop>/")
 def stop():
     print("Server received request for 'range stop' page...")
-    return "Welcome to my 'About' page!"
+    return "Welcome to the end range page!"
 
 
 
