@@ -87,7 +87,15 @@ def stations():
 @app.route("/api/v1.0/tobs/")
 def tobs():
     print("Server received request for 'tempreture observations' page...")
-    return "Welcome to the tempreture observations page!"
+    tobs_list = []
+    results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date.like('2017%')).filter(Measurement.station.like('USC00519281')).order_by(asc(Measurement.date))
+    for row in results:
+        tobs_list.append(row)
+    
+    tobs_df =pd.DataFrame(tobs_list)
+    tobs_dict = tobs_df.to_dict() 
+    
+    return jsonify(tobs_dict)
 
 @app.route("/api/v1.0/<start>/")
 def start():
