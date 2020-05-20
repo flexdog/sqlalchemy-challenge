@@ -41,7 +41,7 @@ welcome_text = """
    <h3> Use <a href="http://localhost:5000/api/v1.0/precipitation">/api/v1.0/precipitation</a> to query for precipitation.</h3> \n
     <h3>Use <a href="http://localhost:5000/api/v1.0/stations">/api/v1.0/stations</a> to query for stations. </h3> \n
     <h3>Use <a href="http://localhost:5000/api/v1.0/tobs">/api/v1.0/tobs</a> to query for tempreture observations. </h3> \n
-    <h3>Use '/api/v1.0/<start>' and/ '/api/v1.0<stop>' in the format: yyyy-mm-dd to obtain \n
+    <h3>Use <a href="http://localhost:5000/api/v1.0/start">api/v1.0/start</a> to query from date forward. </h3> \n
     min, max and average tempreture from a start day with <start> only or <start> and <end> for a range. </h3> \n
     
 </html>
@@ -97,13 +97,13 @@ def tobs():
     
     return jsonify(tobs_dict)
 
-@app.route("/api/v1.0/<start>/")
+@app.route("/api/v1.0/start/")
 def start():
     print("Server received request for 'range start' page...")
     return "Welcome to the start range page!"
 
-@app.route("/api/v1.0/<stop>/")
-def stop():
+@app.route("/api/v1.0/start_end/")
+def start_end():
     print("Server received request for 'range stop' page...")
     return "Welcome to the end range page!"
 
