@@ -15,6 +15,21 @@ from sqlalchemy import create_engine, func, inspect, desc, asc
 # Import Flask
 from flask import Flask, jsonify
 
+def calc_temps(start_date, end_date):
+    """TMIN, TAVG, and TMAX for a list of dates.
+    
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
+    
+    return session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
+
+
 
 #################################################
 # Database Setup
@@ -39,10 +54,10 @@ welcome_text = """
 <html>
    <h2> Welcome to the home page for sqlalchemy Homework #10. </h2> \n
    <h3> Use <a href="http://localhost:5000/api/v1.0/precipitation">/api/v1.0/precipitation</a> to query for precipitation.</h3> \n
-    <h3>Use <a href="http://localhost:5000/api/v1.0/stations">/api/v1.0/stations</a> to query for stations. </h3> \n
-    <h3>Use <a href="http://localhost:5000/api/v1.0/tobs">/api/v1.0/tobs</a> to query for tempreture observations. </h3> \n
-    <h3>Use '/api/v1.0/<start>' and/ '/api/v1.0<stop>' in the format: yyyy-mm-dd to obtain \n
-    min, max and average tempreture from a start day with <start> only or <start> and <end> for a range. </h3> \n
+   <h3> Use <a href="http://localhost:5000/api/v1.0/stations">/api/v1.0/stations</a> to query for stations. </h3> \n
+   <h3> Use <a href="http://localhost:5000/api/v1.0/tobs">/api/v1.0/tobs</a> to query for tempreture observations. </h3> \n
+   <h3> Use <a href="http://localhost:5000/api/v1.0/start">/api/v1.0/start</a> to query the tempreture min, average, and max for the entire dataset before 2017. </h3> \n
+   <h3> Use <a href="http://localhost:5000/api/v1.0/start_end">/api/v1.0/start_end</a> to query the tempreture min, average, and max for the last year (2017) of the dataset. </h3>
     
 </html>
 """
@@ -87,17 +102,31 @@ def stations():
 @app.route("/api/v1.0/tobs/")
 def tobs():
     print("Server received request for 'tempreture observations' page...")
-    return "Welcome to the tempreture observations page!"
+    temp_list = []
+    results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date.like('2017%')).filter(Measurement.station.like('USC00519281')).order_by(asc(Measurement.date))
+    for row in results:
+        temp_list.append(row)
+        
+    temp_df = pd.DataFrame(temp_list)
+    temp_dict = temp_df.to_dict()
+    
+    return jsonify(temp_dict)
 
-@app.route("/api/v1.0/<start>/")
+@app.route("/api/v1.0/start/")
 def start():
     print("Server received request for 'range start' page...")
-    return "Welcome to the start range page!"
+    values = calc_temps('2010-01-01', '2016-12-31')
+    key =['Pre_2017_Temp_Stats']
+    pre_dict = dict(zip(key,values))
+    return jsonify(pre_dict)
 
-@app.route("/api/v1.0/<stop>/")
+@app.route("/api/v1.0/start_end/")
 def stop():
     print("Server received request for 'range stop' page...")
-    return "Welcome to the end range page!"
+    values = calc_temps('2017-01-01', '2017-08-30')
+    key =['2017_Temp_Status']
+    latest_dict = dict(zip(key,values))
+    return jsonify(latest_dict)
 
 
 
