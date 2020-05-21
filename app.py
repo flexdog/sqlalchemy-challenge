@@ -54,10 +54,17 @@ welcome_text = """
 <html>
    <h2> Welcome to the home page for sqlalchemy Homework #10. </h2> \n
    <h3> Use <a href="http://localhost:5000/api/v1.0/precipitation">/api/v1.0/precipitation</a> to query for precipitation.</h3> \n
+<<<<<<< HEAD
    <h3> Use <a href="http://localhost:5000/api/v1.0/stations">/api/v1.0/stations</a> to query for stations. </h3> \n
    <h3> Use <a href="http://localhost:5000/api/v1.0/tobs">/api/v1.0/tobs</a> to query for tempreture observations. </h3> \n
    <h3> Use <a href="http://localhost:5000/api/v1.0/start">/api/v1.0/start</a> to query the tempreture min, average, and max for the entire dataset before 2017. </h3> \n
    <h3> Use <a href="http://localhost:5000/api/v1.0/start_end">/api/v1.0/start_end</a> to query the tempreture min, average, and max for the last year (2017) of the dataset. </h3>
+=======
+    <h3>Use <a href="http://localhost:5000/api/v1.0/stations">/api/v1.0/stations</a> to query for stations. </h3> \n
+    <h3>Use <a href="http://localhost:5000/api/v1.0/tobs">/api/v1.0/tobs</a> to query for tempreture observations. </h3> \n
+    <h3>Use <a href="http://localhost:5000/api/v1.0/start">api/v1.0/start</a> to query from date forward. </h3> \n
+    min, max and average tempreture from a start day with <start> only or <start> and <end> for a range. </h3> \n
+>>>>>>> d6a69ad8041408c9de7bbacfff0976aa1ae5be08
     
 </html>
 """
@@ -102,6 +109,7 @@ def stations():
 @app.route("/api/v1.0/tobs/")
 def tobs():
     print("Server received request for 'tempreture observations' page...")
+<<<<<<< HEAD
     temp_list = []
     results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date.like('2017%')).filter(Measurement.station.like('USC00519281')).order_by(asc(Measurement.date))
     for row in results:
@@ -111,6 +119,17 @@ def tobs():
     temp_dict = temp_df.to_dict()
     
     return jsonify(temp_dict)
+=======
+    tobs_list = []
+    results = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date.like('2017%')).filter(Measurement.station.like('USC00519281')).order_by(asc(Measurement.date))
+    for row in results:
+        tobs_list.append(row)
+    
+    tobs_df =pd.DataFrame(tobs_list)
+    tobs_dict = tobs_df.to_dict() 
+    
+    return jsonify(tobs_dict)
+>>>>>>> d6a69ad8041408c9de7bbacfff0976aa1ae5be08
 
 @app.route("/api/v1.0/start/")
 def start():
@@ -121,7 +140,11 @@ def start():
     return jsonify(pre_dict)
 
 @app.route("/api/v1.0/start_end/")
+<<<<<<< HEAD
 def stop():
+=======
+def start_end():
+>>>>>>> d6a69ad8041408c9de7bbacfff0976aa1ae5be08
     print("Server received request for 'range stop' page...")
     values = calc_temps('2017-01-01', '2017-08-30')
     key =['2017_Temp_Status']
